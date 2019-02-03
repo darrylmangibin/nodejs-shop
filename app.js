@@ -1,32 +1,24 @@
+const path = require('path');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const path = require('path');
+const errorController = require('./controllers/error');
 
 const app = express();
-
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
-const adminData = require('./routes/admin');
-const shopRoute = require('./routes/shop')
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(bodyParser.urlencoded());
-app.use(express.static(path.join(__dirname, 'public')))
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 
-app.use('/admin', adminData.routes);
-app.use(shopRoute);
+app.use(errorController.get404);
 
-app.use((req, res, next) => {
-    // res.status(404).sendFile(path.join(__dirname, 'views', '404.html'))
-    res.status(404).render('404', {
-        pageTitle: '404',
-        pageMessage: 'Page Not Found'
-    })
-})
-
-app.listen(3000, () => {
-    console.log('Server is up on port 3000')
-})
+app.listen(3000);
